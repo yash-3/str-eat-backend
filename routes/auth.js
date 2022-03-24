@@ -43,7 +43,9 @@ router.get("/verify/:token", authController.verifyAccount);
 
 router.post("/login", authController.login);
 
-router.post("/forgotPassword", authController.forgetPassword );
+router.post("/sendResetPassLink", authController.sendResetPassLink);
+router.post("/resetPassword", authController.resetPassword);
+
 
 router.post(
   "/signup-seller",

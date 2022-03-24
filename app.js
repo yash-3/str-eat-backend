@@ -4,6 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
+require('dotenv').config();
 
 const authRoutes = require("./routes/auth");
 const itemRoutes = require("./routes/item");
@@ -73,7 +74,7 @@ const clients = {};
 
 mongoose
   .connect(
-    `mongodb://yash333:yash333@food-shard-00-00.asoz9.mongodb.net:27017,food-shard-00-01.asoz9.mongodb.net:27017,food-shard-00-02.asoz9.mongodb.net:27017/FoodDB?ssl=true&replicaSet=atlas-m1h7l6-shard-0&authSource=admin&retryWrites=true&w=majority`
+    `${process.env.MONGO_DATABASE_URL}`
   )
   .then((result) => {
     console.log("Connected to db");
