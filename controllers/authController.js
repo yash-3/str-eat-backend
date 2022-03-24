@@ -8,11 +8,12 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const Account = require("../models/account");
 const Seller = require("../models/seller");
+require('dotenv').config();
 
 const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
-      api_key: "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",
+      api_key: process.env.SENDGRID_KEY,
     },
   })
 );
@@ -67,11 +68,11 @@ exports.signupUser = (req, res, next) => {
     .then((savedUser) => {
       transporter.sendMail({
         to: email,
-        from: "patelyashp333@gmail.com",
+        from: process.env.SENDGRID_SENDER_MAIL,
         subject: "Verify your Account on StrEAT",
         html: `
                       <p>Please verify your email by clicking on the link below - StrEAT</p>
-                      <p>Click this <a href="http://localhost:3002/auth/verify/${token}">link</a> to verify your account.</p>
+                      <p>Click this <a href="${process.env.SERVER_URL}/auth/verify/${token}">link</a> to verify your account.</p>
                     `,
       });
       res.status(201).json({
@@ -114,7 +115,7 @@ exports.verifyAccount = (req, res, next) => {
     });
 };
 
-exports.forgetPassword = (req, res, next) => {
+exports.sendResetPassLink = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -125,32 +126,89 @@ exports.forgetPassword = (req, res, next) => {
   }
 
   const email = req.body.email;
-  let token; 
-
-  console.log("<<<<<<<<<<<<<<<<<<<<",req);
+  console.log(">>>>", email);
 
   const user = Account.findOne({ email: email }).then((account) => {
-    console.log("LL>>>>>>",account);
-    if (!account  || account.isVerified == false) {
+    if (!account || account.isVerified == false) {
       const error = new Error("Invalid email/Not varified Email.  ");
       error.statusCode = 401;
       throw error;
     }
     let newToken = crypto.randomBytes(32).toString("hex");
     let query = { email: email };
-    let data = { $set: { accountVerifyToken: newToken, accountVerifyTokenExpiration : Date.now() + 3600000, isVerified:false } };
-    
-    console.log(">>", email, ">>>>" );
-    Account.updateOne(query , data, (err , collection) => {
-      if(err) throw err;
+    let data = { $set: { accountVerifyToken: newToken, accountVerifyTokenExpiration: Date.now() + 3600000, isVerified: false } };
+
+    Account.updateOne(query, data, (err, collection) => {
+      if (err) throw err;
       console.log("Record updated successfully");
+      console.log(">>>", newToken);
       console.log(collection);
+    });
+
+    transporter.sendMail({
+      to: email,
+      from: process.env.SENDGRID_SENDER_MAIL,
+      subject: "Verify your Account on StrEAT",
+      html: `
+                      <p>Reset Password Link - StrEAT</p>
+                      <p>Click this <a href="${process.env.CLIENT_URL}/auth/resetPassword/${newToken}">link</a> to reset your password .</p>
+                    `,
+    });
+    res.status(201).json({
+      message:
+        "Reset password link sent successfully ",
     });
     // account.accountVerifyToken = newToken;
     // account.accountVerifyTokenExpiration = Date.now() + 3600000;
     // account.save();
 
   });
+
+}
+
+exports.resetPassword = (req, res, next) => {
+
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation Failed, Incorrect data entered.");
+    error.statusCode = 422;
+    error.errors = errors.array();
+    throw error;
+  }
+
+  var password = req.body.password;
+  const token = req.body.token;
+  bcrypt.hash(password, 12).then((hashedPasswordInreset) => {
+    console.log(">>>>", hashedPasswordInreset, password, ">>>>");
+    const user = Account.findOne({ accountVerifyToken: token }).then((account) => {
+
+      if (account != null) {
+        console.log("?>>>", account, token);
+
+        account.password = hashedPasswordInreset;
+        account.isVerified = true;
+        account.accountVerifyToken = undefined;
+        account.accountVerifyTokenExpiration = undefined;
+        account.save();
+        res.status(201).json({
+          message:
+            "Reset password successful",
+        });
+      }
+      else {
+        res.status(404).json({
+          message:
+            "Invalid",
+        });
+      }
+
+
+
+    });
+  });
+
 
 }
 
@@ -279,11 +337,11 @@ exports.signupSeller = (req, res, next) => {
     .then((savedSeller) => {
       transporter.sendMail({
         to: email,
-        from: "patelyashp333@gmail.com",
+        from: process.env.SENDGRID_SENDER_MAIL,
         subject: "Verify your Account on StrEAT",
         html: `
                       <p>Please verify your email by clicking on the link below - StrEAT</p>
-                      <p>Click this <a href="http://localhost:3002/auth/verify/${token}">link</a> to verify your account.</p>
+                      <p>Click this <a href="${process.env.SERVER_URL}/auth/verify/${token}">link</a> to verify your account.</p>
                     `,
       });
       res.status(201).json({
