@@ -3,6 +3,6 @@
     "MONGO_USER": "yash333",
     "MONGO_PASSWORD": "yash333",
     "MONGO_DATABASE": "FoodDB",
-    "SENDGRID_KEY": "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"
+    "SENDGRID_KEY": "sendgrid API"
   }
 }
