@@ -1,8 +1,0 @@
-{
-  "env": {
-    "MONGO_USER": "yash333",
-    "MONGO_PASSWORD": "yash333",
-    "MONGO_DATABASE": "FoodDB",
-    "SENDGRID_KEY": "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"
-  }
-}
