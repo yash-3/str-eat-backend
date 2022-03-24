@@ -12,7 +12,7 @@ const Seller = require("../models/seller");
 const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
-      api_key: "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",
+      api_key: "Sendgrid AIP",
     },
   })
 );
