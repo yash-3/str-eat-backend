@@ -9,6 +9,7 @@ const Account = require("../models/account");
 const Order = require("../models/order");
 const io = require("../util/socket");
 const app = require("../app");
+const orderMail = require("./emailController");
 
 exports.getRestaurants = (req, res, next) => {
   Seller.find()
@@ -441,12 +442,14 @@ exports.postOrderStatus = (req, res, next) => {
     .then((updatedOrder) => {
       io.getIO().emit("orders", { action: "update", order: updatedOrder });
       res.status(200).json({ updatedOrder });
+      orderMail(updatedOrder);
     })
     .catch((err) => {
       if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
+
 
 exports.getConnectedClients = (req, res, next) => {
   res.json({ clients: app.clients });
