@@ -105,9 +105,23 @@ module.exports = function(fileName,orderObject) {
 
         pdfDoc.font(fontBold).text(totalPrice, 445, 256 + (productNo * 17));
 
+       
         pdfDoc.end();
+        
+        //stream.on("finish", callback ()=> { return true;})
         console.log("pdf generate successfully");
+        //return x;
+
+        // let pdfDoc = new pdfKit;
+        // pdfDoc.pipe(fs.createWriteStream('mpleDocument.pdf'));
+        // pdfDoc.text("My Sample PDF Document");
+        // pdfDoc.end();
+        // return true;
+
     } catch (error) {
         console.log("Error occurred", error);
+        return false;
     }
+
+
 }
